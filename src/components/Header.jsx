@@ -5,6 +5,7 @@ const NAV = [
   ['Search', '#search'],
   ['Modules', '#modules'],
   ['About', '#about'],
+  ['Designs', '#designs'],
 ];
 
 function AccessPanel({ settings, update, onClose }) {

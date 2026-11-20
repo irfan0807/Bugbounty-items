@@ -5,6 +5,7 @@ import Hero from './components/Hero.jsx';
 import ClassMap from './components/ClassMap.jsx';
 import Programs from './components/Programs.jsx';
 import Search from './components/Search.jsx';
+import DesignGallery from './components/DesignGallery.jsx';
 import { Modules, About, Footer } from './components/Sections.jsx';
 import { useSettings } from './hooks.js';
 import { loadData } from './data.js';
@@ -45,6 +46,7 @@ export default function App() {
             <Search data={data} filters={filters} setFilters={setFilters} />
             <Modules />
             <About data={data} />
+            <DesignGallery data={data} settings={settings} update={update} />
           </>
         )}
       </main>
