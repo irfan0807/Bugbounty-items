@@ -3,8 +3,11 @@
 // Nothing is inferred here: if NVD does not say it, it is not returned.
 
 const cache = new Map();
+const searchCache = new Map();
+let kevCache = null;
+const CISA_KEV = 'https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json';
 const NVD = 'https://services.nvd.nist.gov/rest/json/cves/2.0?cveId=';
-const HEADERS = { 'User-Agent': 'HexBrainNexusReader/1.0', Accept: 'application/json' };
+const HEADERS = { 'User-Agent': 'SkyNetSecurityReader/1.0', Accept: 'application/json' };
 
 function parseCpe(uri) {
   const p = uri.split(':'); // cpe:2.3:part:vendor:product:version:...
@@ -97,6 +100,63 @@ export async function fetchCve(id) {
   return out;
 }
 
+async function fetchKev() {
+  if (kevCache && Date.now() - kevCache.savedAt < 60 * 60 * 1000) return kevCache.data;
+  const res = await fetch(CISA_KEV, { headers: { 'User-Agent': HEADERS['User-Agent'], Accept: 'application/json' } });
+  if (!res.ok) {
+    const e = new Error(`CISA KEV answered HTTP ${res.status}`);
+    e.status = 502;
+    throw e;
+  }
+  const body = await res.json();
+  const data = {
+    title: body.title,
+    catalogVersion: body.catalogVersion,
+    dateReleased: body.dateReleased,
+    count: body.count ?? body.vulnerabilities?.length ?? 0,
+    vulnerabilities: (body.vulnerabilities || []).map((v) => ({
+      cveID: v.cveID,
+      vendorProject: v.vendorProject,
+      product: v.product,
+      vulnerabilityName: v.vulnerabilityName,
+      dateAdded: v.dateAdded,
+      shortDescription: v.shortDescription,
+      requiredAction: v.requiredAction,
+      dueDate: v.dueDate,
+      knownRansomwareCampaignUse: v.knownRansomwareCampaignUse,
+      notes: v.notes,
+    })),
+  };
+  kevCache = { data, savedAt: Date.now() };
+  return data;
+}
+
+async function searchCves(query) {
+  const key = query.trim().toLowerCase();
+  if (searchCache.has(key)) return searchCache.get(key);
+  const params = new URLSearchParams({ keywordSearch: query.trim(), resultsPerPage: '20', sortBy: 'published', sortOrder: 'desc' });
+  const res = await fetch(`https://services.nvd.nist.gov/rest/json/cves/2.0?${params}`, { headers: HEADERS });
+  if (!res.ok) {
+    const e = new Error(`NVD answered HTTP ${res.status}`);
+    e.status = 502;
+    throw e;
+  }
+  const j = await res.json();
+  const result = {
+    total: j.totalResults ?? 0,
+    cves: (j.vulnerabilities || []).map(({ cve }) => ({
+      id: cve.id,
+      description: (cve.descriptions || []).find((d) => d.lang === 'en')?.value || '',
+      published: cve.published,
+      cvss: pickCvss(cve.metrics),
+      kev: cve.cisaExploitAdd ? { added: cve.cisaExploitAdd, name: cve.cisaVulnerabilityName || null } : null,
+      evidenceUrl: `https://nvd.nist.gov/vuln/detail/${cve.id}`,
+    })),
+  };
+  searchCache.set(key, result);
+  return result;
+}
+
 function sendJson(res, status, body) {
   res.statusCode = status;
   res.setHeader('Content-Type', 'application/json');
@@ -126,6 +186,24 @@ async function fetchCweCves(cwe) {
 }
 
 function handler(req, res, next) {
+  const search = /^\/api\/cves\/search\/?(?:\?(.*))?$/.exec(req.url || '');
+  if (search) {
+    const query = new URLSearchParams(search[1] || '').get('q')?.trim();
+    if (!query || query.length < 2 || query.length > 120) {
+      sendJson(res, 400, { error: 'Enter at least two characters to search CVEs.' });
+      return;
+    }
+    searchCves(query)
+      .then((data) => sendJson(res, 200, data))
+      .catch((e) => sendJson(res, e.status || 500, { error: e.message }));
+    return;
+  }
+  if (/^\/api\/kev\/?(?:\?.*)?$/.test(req.url || '')) {
+    fetchKev()
+      .then((data) => sendJson(res, 200, data))
+      .catch((e) => sendJson(res, e.status || 500, { error: e.message }));
+    return;
+  }
   const c = /^\/api\/cwe\/(CWE-\d{1,5})\/cves\/?(\?.*)?$/i.exec(req.url || '');
   if (c) {
     fetchCweCves(c[1].toUpperCase())
@@ -142,7 +220,7 @@ function handler(req, res, next) {
 
 export default function cvePlugin() {
   return {
-    name: 'hexbrain-cve-adapter',
+    name: 'skynet-cve-adapter',
     configureServer(s) { s.middlewares.use(handler); },
     configurePreviewServer(s) { s.middlewares.use(handler); },
   };

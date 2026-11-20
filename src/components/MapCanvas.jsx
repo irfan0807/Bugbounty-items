@@ -6,7 +6,7 @@ const clampK = (k) => Math.min(6, Math.max(0.35, k));
 
 // Full-screen canvas map. Pan = drag, zoom = wheel / pinch buttons, click = select.
 // It redraws only when something changes (no continuous animation loop).
-export default function MapCanvas({ data, focus, onPick, resetKey }) {
+export default function MapCanvas({ data, focus, onPick, resetKey, onOpenTerminal }) {
   const ref = useRef(null);
   const layout = useMemo(() => computeLayout(data), [data]);
   const [view, setView] = useState({ x: 0, y: 0, k: 1 });
@@ -25,10 +25,11 @@ export default function MapCanvas({ data, focus, onPick, resetKey }) {
     return () => ro.disconnect();
   }, []);
 
-  // Fit the map to the window the first time we know the size.
+  // Fit the map to the viewport (width first, so outer labels stay visible) on resize or reset.
   useEffect(() => {
-    if (size.w) setView((v) => (v.k === 1 && v.x === 0 && v.y === 0 ? { x: 0, y: 0, k: clampK(Math.min(size.w, size.h) / 1250) } : v));
-  }, [size.w > 0]); // eslint-disable-line react-hooks/exhaustive-deps
+    if (!size.w || !size.h) return;
+    setView({ x: 0, y: 0, k: clampK(Math.min((size.h - 200) / 700, (size.w - 24) / 700)) });
+  }, [size.w, size.h, resetKey]);
 
   useEffect(() => {
     const el = ref.current;
@@ -37,7 +38,14 @@ export default function MapCanvas({ data, focus, onPick, resetKey }) {
     el.width = size.w * dpr;
     el.height = size.h * dpr;
     const cs = getComputedStyle(document.documentElement);
-    const colors = { line: cs.getPropertyValue('--line').trim(), ink: cs.getPropertyValue('--ink').trim(), hot: cs.getPropertyValue('--hot').trim() };
+    const colors = {
+      line: cs.getPropertyValue('--line').trim(),
+      ink: cs.getPropertyValue('--ink').trim(),
+      hot: cs.getPropertyValue('--hot').trim(),
+      dim: cs.getPropertyValue('--dim').trim(),
+      bg: cs.getPropertyValue('--bg').trim(),
+      faint: '#5c5848',
+    };
     drawMap(el.getContext('2d'), size.w, size.h, dpr, layout, view, focus, hover, colors);
   }, [size, layout, view, focus, hover]);
 
@@ -64,6 +72,7 @@ export default function MapCanvas({ data, focus, onPick, resetKey }) {
   }, []);
 
   const down = (e) => {
+    if (e.button !== 0) return;
     ref.current.setPointerCapture?.(e.pointerId);
     drag.current = { sx: e.clientX, sy: e.clientY, vx: view.x, vy: view.y, moved: false };
   };
@@ -93,12 +102,19 @@ export default function MapCanvas({ data, focus, onPick, resetKey }) {
     <canvas
       ref={ref}
       className="map"
+      data-box={`${size.w}x${size.h} dpr ${window.devicePixelRatio} k ${view.k.toFixed(3)} x ${Math.round(view.x)} y ${Math.round(view.y)}`}
       style={{ cursor: hover ? 'pointer' : undefined }}
       aria-label="Map of disclosed vulnerability reports grouped by class and weakness. Use the Browse page for a list version."
       onPointerDown={down}
       onPointerMove={move}
       onPointerUp={up}
       onPointerLeave={() => { drag.current = null; setHover(null); }}
+      onContextMenu={(event) => {
+        const bounds = ref.current?.getBoundingClientRect();
+        if (!bounds || event.clientX < bounds.left + bounds.width / 2 || !onOpenTerminal) return;
+        event.preventDefault();
+        onOpenTerminal();
+      }}
     />
   );
 }

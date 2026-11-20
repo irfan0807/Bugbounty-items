@@ -22,7 +22,7 @@ Audited before any TRON / Graph / Academy changes. Checkpoint: git tag `checkpoi
 Header (nav + Access panel), Hero, ClassMap, Programs, Search, ReportModal, Sections (Modules/About/Footer), Starfield.
 
 ## Settings
-- `hooks.js` `useSettings`: motion / contrast / text size in localStorage key `hexbrain-nexus-settings`, mirrored to `<html data-*>`.
+- `hooks.js` `useSettings`: motion / contrast / text size in localStorage key `skynet-nexus-settings` (migrates prior settings), mirrored to `<html data-*>`.
 
 ## Baseline behaviour to preserve
 - 15,219 reports, 428 programs, 215 weaknesses, 18 classes + Other.

@@ -1,0 +1,9 @@
+services:
+  skynet-ttyd:
+    image: ghcr.io/tsl0922/ttyd:alpine
+    command: ["ttyd", "-W", "-O", "-o", "-p", "7681", "-i", "127.0.0.1", "-w", "/host", "/bin/sh"]
+    working_dir: /host
+    network_mode: host
+    volumes:
+      - /:/host
+    restart: always

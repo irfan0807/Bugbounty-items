@@ -33,7 +33,7 @@ function Settings({ settings, update, onClose }) {
   );
 }
 
-export default function TopBar({ data, sel, lens, setLens, onHome, onFind, settings, update, onCrumb }) {
+export default function TopBar({ data, sel, lens, setLens, onHome, onFind, settings, update, onCrumb, page = 'map' }) {
   const [menu, setMenu] = useState(false);
   const cls = data && sel.classIdx != null ? data.classes.find((c) => c.index === sel.classIdx) : null;
   const weak = cls && sel.weaknessIdx != null ? cls.weaknesses.find((w) => w.index === sel.weaknessIdx) : null;
@@ -41,30 +41,45 @@ export default function TopBar({ data, sel, lens, setLens, onHome, onFind, setti
   return (
     <header className="top">
       <nav className="crumbs" aria-label="Position in the map">
-        <span className="lens" role="group" aria-label="What the map is organised by">
-          {LENSES.map(([id, label]) => (
-            <button key={id} type="button" aria-pressed={lens === id} onClick={() => setLens(id)}>{label}</button>
-          ))}
-        </span>
-        {cls && (
+        {page === 'map' ? (
+          <span className="lens" role="group" aria-label="What the map is organised by">
+            {LENSES.map(([id, label]) => (
+              <button key={id} type="button" aria-pressed={lens === id} onClick={() => setLens(id)}>{label}</button>
+            ))}
+          </span>
+        ) : <span className="dim">{page[0]?.toUpperCase() + page.slice(1)}</span>}
+        {weak && (
           <>
             <i>/</i>
-            {weak ? <button type="button" className="crumb" onClick={() => onCrumb({ weaknessIdx: null, reportId: null })}>{cls.name}</button> : <b>{cls.name}</b>}
+            <button type="button" className="crumb" onClick={() => onCrumb({ weaknessIdx: null, reportId: null })}>{cls.name}</button>
+            <i>/</i>
+            <b>{weak.name}</b>
           </>
         )}
-        {weak && <><i>/</i><b>{weak.name}</b></>}
       </nav>
 
-      <a className="brand" href="#top" aria-label="HexBrain home" onClick={(e) => { e.preventDefault(); onHome(); }} style={{ pointerEvents: 'auto' }}>
+      <a className="brand" href="/" aria-label="SkyNet home" onClick={(e) => { if (page === 'map') { e.preventDefault(); onHome(); } }} style={{ pointerEvents: 'auto' }}>
         <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
-          <polygon points="12,2 21,7 21,17 12,22 3,17 3,7" fill="none" stroke="currentColor" strokeWidth="1.4" />
-          <circle cx="12" cy="12" r="2.2" fill="var(--hot)" />
+          <circle cx="12" cy="12" r="5" fill="none" stroke="currentColor" strokeWidth="1.4" />
+          <path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2" stroke="currentColor" strokeWidth="1.4" fill="none" />
+          <circle cx="12" cy="12" r="1.8" fill="var(--hot)" />
         </svg>
-        HexBrain
+        SkyNet
       </a>
+      <nav className="site-nav" aria-label="Main navigation">
+        {[["map", "Map", "/"], ["browse", "Browse", "/browse"], ["bypasses", "Bypasses", "/bypasses"], ["payloads", "Payloads", "/payloads"], ["cves", "CVEs", "/cves"], ["learn", "Learn", "/learn"], ["api", "API", "/api"], ["about", "About", "/about"]].map(([id, label, href]) => (
+          <a key={id} href={href} aria-current={page === id ? 'page' : undefined}>{label}</a>
+        ))}
+      </nav>
+      {cls && (
+        <p className="focus-name" aria-live="polite">
+          {cls.name}
+          <span className="dim">{cls.count.toLocaleString('en-US')} reports</span>
+        </p>
+      )}
 
       <div className="keys">
-        <button type="button" className="key" onClick={onFind}>Find <kbd>F</kbd></button>
+        <button type="button" className="key" onClick={onFind}>Find <kbd>[F]</kbd></button>
         <span className="set-wrap">
           <button type="button" className="key" aria-haspopup="dialog" aria-expanded={menu} onClick={() => setMenu((m) => !m)}>Access</button>
           {menu && <Settings settings={settings} update={update} onClose={() => setMenu(false)} />}

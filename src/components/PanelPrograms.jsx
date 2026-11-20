@@ -1,9 +1,11 @@
 import { useMemo, useState } from 'react';
 
 // Program index: an A-Z key, then a strip per program with its report count and total bounty.
-export default function PanelPrograms({ data, onPick }) {
-  const [letter, setLetter] = useState('');
+export default function PanelPrograms({ data, onPick, selectedLetter, onLetterChange }) {
+  const [localLetter, setLocalLetter] = useState('');
   const [q, setQ] = useState('');
+  const letter = selectedLetter ?? localLetter;
+  const setLetter = onLetterChange ?? setLocalLetter;
 
   const letters = useMemo(() => [...new Set(data.programs.map((p) => p.name[0].toUpperCase()))].sort(), [data]);
   const list = useMemo(() => {

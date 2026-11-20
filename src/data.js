@@ -52,7 +52,7 @@ export async function loadData() {
     totalBounty,
     stats: [
       { label: 'Reports', value: reports.length, prefix: '', hint: 'Public disclosures indexed' },
-      { label: 'Classes', value: classes.length - 1, prefix: '', hint: 'Vulnerability families' },
+      { label: 'Classes', value: classes.length, prefix: '', hint: 'Vulnerability families' },
       { label: 'Weaknesses', value: raw.weaknesses.length, prefix: '', hint: 'Distinct weakness types' },
       { label: 'Programs', value: raw.programs.length, prefix: '', hint: 'Bounty programs covered' },
       { label: 'Bounties', value: totalBounty, prefix: '$', hint: 'Total paid out' },

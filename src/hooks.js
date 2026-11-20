@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
 
 const DEFAULTS = { motion: true, contrast: false, text: 'md', theme: 'dark', design: 'grid' };
-const KEY = 'hexbrain-nexus-settings';
+const KEY = 'skynet-nexus-settings';
+const LEGACY_KEY = 'hexbrain-nexus-settings';
 
 function load() {
   try {
-    const saved = JSON.parse(localStorage.getItem(KEY));
+    const saved = JSON.parse(localStorage.getItem(KEY) || localStorage.getItem(LEGACY_KEY));
     const base = { ...DEFAULTS, ...(saved || {}) };
     if (!saved && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) {
       base.motion = false;

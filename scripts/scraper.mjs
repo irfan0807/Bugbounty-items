@@ -4,7 +4,7 @@
 const cache = new Map();
 const HEADERS = {
   Accept: 'application/json',
-  'User-Agent': 'Mozilla/5.0 (compatible; HexBrainNexusReader/1.0)',
+  'User-Agent': 'Mozilla/5.0 (compatible; SkyNetSecurityReader/1.0)',
 };
 
 export async function scrapeReport(id) {
@@ -67,7 +67,7 @@ function handler(req, res, next) {
 
 export default function scraperPlugin() {
   return {
-    name: 'hexbrain-scraper',
+    name: 'skynet-scraper',
     configureServer(server) {
       server.middlewares.use(handler);
     },
