@@ -5,6 +5,7 @@
 @import './modal.css';
 @import './designs.css';
 @import './gallery.css';
+@import './graph.css';
 
 * { box-sizing: border-box; }
 html { scroll-behavior: smooth; font-size: var(--fs); scroll-padding-top: 5.5rem; }
