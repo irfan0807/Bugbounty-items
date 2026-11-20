@@ -1,0 +1,23 @@
+/* Five TRON design concepts. Each one only overrides tokens, so it works in both light and dark.
+   Selectors are attribute-only so the gallery can preview a design inside a single element. */
+
+/* 01 GRID - the default: neon borders over a visible digital grid */
+[data-design='grid'] { --radius: 14px; --blur: 14px; --grid-size: 56px; }
+
+/* 02 HOLOGRAPHIC - translucent, layered, floating */
+[data-design='holo'] { --radius: 24px; --blur: 30px; --grid-size: 90px; --glass: rgba(var(--tint), 0.03); --glass-hi: rgba(var(--tint), 0.07); --glow: 0 0 40px rgba(var(--accent-rgb), 0.35); }
+
+/* 03 COMMAND CENTER - dense, square, tactical */
+[data-design='command'] { --radius: 3px; --blur: 6px; --grid-size: 28px; --grid-line: rgba(var(--accent-rgb), 0.12); --font-body: var(--mono); }
+
+/* 04 MINIMAL - restrained accents, quiet background */
+[data-design='minimal'] { --radius: 10px; --blur: 0px; --grid-size: 56px; --grid-line: transparent; --glow: none; --line: rgba(var(--tint), 0.16); }
+
+/* 05 QUANTUM - particles and bright nodes */
+[data-design='quantum'] { --radius: 18px; --blur: 20px; --grid-size: 120px; --grid-line: rgba(var(--accent-rgb), 0.04); --glow: 0 0 34px rgba(var(--violet-rgb), 0.45); }
+
+[data-design='minimal'] .starfield { opacity: 0.15; }
+[data-design='quantum'] .starfield { opacity: 1; }
+[data-design='command'] .starfield { opacity: 0.25; }
+
+.glass, .panel { box-shadow: var(--glow), 0 20px 50px -24px rgba(var(--shadow-rgb), 0.6); border-radius: var(--radius); -webkit-backdrop-filter: blur(var(--blur)) saturate(160%); backdrop-filter: blur(var(--blur)) saturate(160%); }

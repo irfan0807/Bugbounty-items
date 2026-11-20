@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-const DEFAULTS = { motion: true, contrast: false, text: 'md' };
+const DEFAULTS = { motion: true, contrast: false, text: 'md', theme: 'dark', design: 'grid' };
 const KEY = 'hexbrain-nexus-settings';
 
 function load() {
@@ -25,6 +25,8 @@ export function useSettings() {
     root.dataset.motion = settings.motion ? 'on' : 'off';
     root.dataset.contrast = settings.contrast ? 'high' : 'normal';
     root.dataset.text = settings.text;
+    root.dataset.theme = settings.theme;
+    root.dataset.design = settings.design;
     try {
       localStorage.setItem(KEY, JSON.stringify(settings));
     } catch {

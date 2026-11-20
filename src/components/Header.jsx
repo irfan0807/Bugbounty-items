@@ -86,6 +86,14 @@ export default function Header({ settings, update }) {
         <button
           type="button"
           className="btn ghost small"
+          aria-pressed={settings.theme === 'light'}
+          onClick={() => update({ theme: settings.theme === 'dark' ? 'light' : 'dark' })}
+        >
+          {settings.theme === 'dark' ? 'Light mode' : 'Dark mode'}
+        </button>
+        <button
+          type="button"
+          className="btn ghost small"
           aria-haspopup="dialog"
           aria-expanded={open}
           onClick={() => setOpen((o) => !o)}
