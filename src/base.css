@@ -1,0 +1,56 @@
+/* HexBrain look: warm near-black, cream ink, orange accent, Recursive type, full-screen map. */
+:root {
+  --bg: #13120e;
+  --raise: #1f1d17;
+  --line: #322f25;
+  --ink: #efe6d0;
+  --dim: #8f8874;
+  --hot: #ff6a3d;
+  --red: #ff3b30;
+  --font: 'Recursive Variable', 'Recursive', system-ui, sans-serif;
+  color-scheme: dark;
+}
+:root[data-text='sm'] { font-size: 14px; }
+:root[data-text='lg'] { font-size: 19px; }
+:root[data-contrast='high'] { --dim: #c9c1aa; --line: #6b6652; }
+:root[data-motion='off'] * { animation: none !important; transition: none !important; }
+
+* { box-sizing: border-box; }
+html, body, #root { height: 100%; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font);
+  font-variation-settings: 'MONO' 0;
+  font-size: 16px;
+  line-height: 1.5;
+  font-weight: 400;
+  overflow-wrap: anywhere;
+  -webkit-font-smoothing: antialiased;
+}
+a { color: inherit; }
+button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
+h1, h2, h3 { font-weight: 400; margin: 0; }
+p { margin: 0; }
+kbd { font: inherit; }
+:focus-visible { outline: 2px solid var(--hot); outline-offset: 2px; border-radius: 4px; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.skip { position: fixed; left: 12px; top: -48px; z-index: 99; background: var(--ink); color: var(--bg); padding: 8px 14px; border-radius: 6px; }
+.skip:focus { top: 12px; }
+.mono { font-variation-settings: 'MONO' 0.5; }
+.dim { color: var(--dim); }
+.hot { color: var(--hot); }
+
+/* Small controls shared across screens */
+.key { background: var(--raise); border-radius: 6px; height: 30px; padding: 0 12px; font-size: 0.75rem; display: inline-flex; align-items: center; text-decoration: none; }
+.key:hover { background: var(--line); }
+.key kbd { color: var(--dim); font-variation-settings: 'MONO' 0.5; margin-left: 6px; }
+.lens { display: inline-flex; gap: 2px; padding: 2px; background: var(--raise); border-radius: 7px; }
+.lens button { height: 26px; padding: 0 11px; border-radius: 5px; font-size: 0.75rem; color: var(--dim); }
+.lens button:hover { color: var(--ink); }
+.lens button[aria-pressed='true'] { background: var(--ink); color: var(--bg); }
+.link { text-decoration: underline; text-underline-offset: 2px; text-decoration-thickness: 1px; }
+.link:hover { color: var(--hot); }
+.tag { font-size: 0.6875rem; color: var(--dim); font-variation-settings: 'MONO' 0.5; letter-spacing: 0.04em; }
+.rule { border: 0; border-top: 1px solid var(--line); margin: 16px 0; }

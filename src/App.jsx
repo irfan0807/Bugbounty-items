@@ -1,57 +1,86 @@
-import { useEffect, useState } from 'react';
-import Starfield from './components/Starfield.jsx';
-import Header from './components/Header.jsx';
-import Hero from './components/Hero.jsx';
-import ClassMap from './components/ClassMap.jsx';
-import Programs from './components/Programs.jsx';
-import Search from './components/Search.jsx';
-import DesignGallery from './components/DesignGallery.jsx';
-import { Modules, About, Footer } from './components/Sections.jsx';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import MapCanvas from './components/MapCanvas.jsx';
+import TopBar from './components/TopBar.jsx';
+import Landing from './components/Landing.jsx';
+import SidePanel from './components/SidePanel.jsx';
 import { useSettings } from './hooks.js';
 import { loadData } from './data.js';
 
-const EMPTY_FILTERS = { query: '', classIdx: 'all', weaknessIdx: 'all', programIdx: 'all', sort: 'upvotes' };
+const NONE = { classIdx: null, weaknessIdx: null, programIdx: null, reportId: null };
 
 export default function App() {
   const [settings, update] = useSettings();
   const [data, setData] = useState(null);
   const [error, setError] = useState('');
-  const [filters, setFilters] = useState(EMPTY_FILTERS);
+  const [lens, setLens] = useState('vulnerabilities');
+  const [sel, setSel] = useState(NONE);
+  const [resetKey, setResetKey] = useState(0);
+  const [searching, setSearching] = useState(false);
 
   useEffect(() => {
     loadData().then(setData).catch((e) => setError(e.message));
   }, []);
 
-  const applyFilters = (patch) => {
-    setFilters({ ...EMPTY_FILTERS, ...patch });
-    requestAnimationFrame(() =>
-      document.getElementById('search')?.scrollIntoView({ behavior: settings.motion ? 'smooth' : 'auto' })
-    );
+  const open = sel.classIdx != null || sel.programIdx != null || sel.reportId != null || searching || lens !== 'vulnerabilities';
+  const focus = useMemo(() => (sel.classIdx == null ? null : { classIdx: sel.classIdx, weaknessIdx: sel.weaknessIdx }), [sel]);
+
+  const clear = useCallback(() => {
+    setSel(NONE);
+    setSearching(false);
+    setLens('vulnerabilities');
+    setResetKey((k) => k + 1);
+  }, []);
+
+  const pickOnMap = useCallback((hit) => {
+    if (!hit) return;
+    setLens('vulnerabilities');
+    setSearching(false);
+    setSel({ ...NONE, classIdx: hit.cls.index, weaknessIdx: hit.type === 'weakness' ? hit.weakness.index : null });
+  }, []);
+
+  // "F" opens search, Escape closes whatever is open.
+  useEffect(() => {
+    const onKey = (e) => {
+      const typing = /input|textarea|select/i.test(e.target.tagName);
+      if (e.key === 'Escape') clear();
+      else if (!typing && !e.metaKey && !e.ctrlKey && e.key.toLowerCase() === 'f') {
+        e.preventDefault();
+        setSearching(true);
+      }
+    };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [clear]);
+
+  const changeLens = (l) => {
+    setLens(l);
+    setSearching(false);
+    setSel(NONE);
   };
 
   return (
-    <>
-      <a className="skip" href="#main">Skip to content</a>
-      <Starfield enabled={settings.motion} />
-      <div className="scanlines" aria-hidden="true" />
-      <Header settings={settings} update={update} />
-      <main id="main">
-        {error && <div className="panel empty" role="alert">Data failed to load: {error}. Run <code>node scripts/build-data.mjs</code> first.</div>}
-        {!data && !error && <div className="panel empty" role="status">Loading 15,000+ reports...</div>}
-        {data && (
-          <>
-            <Hero motion={settings.motion} stats={data.stats} />
-            <ClassMap data={data} onPick={(classIdx, weaknessIdx = 'all') => applyFilters({ classIdx, weaknessIdx })} />
-            <Programs data={data} onPick={(programIdx) => applyFilters({ programIdx })} />
-            <Search data={data} filters={filters} setFilters={setFilters} />
-            <Modules />
-            <About data={data} />
-            <DesignGallery data={data} settings={settings} update={update} />
-          </>
-        )}
-      </main>
-      <Footer />
-    </>
+    <div className="shell">
+      <a className="skip" href="#panel">Skip to details</a>
+      {data && <MapCanvas data={data} focus={focus} onPick={pickOnMap} resetKey={resetKey} />}
+      {['tl', 'tr', 'bl', 'br'].map((c) => <span key={c} className={`corner ${c}`} aria-hidden="true" />)}
+
+      <TopBar
+        data={data} sel={sel} lens={lens} setLens={changeLens}
+        onHome={clear} onFind={() => setSearching(true)} settings={settings} update={update}
+        onCrumb={(patch) => setSel((s) => ({ ...s, ...patch }))}
+      />
+
+      {error && <div className="loading" role="alert">Data failed to load: {error}. Run node scripts/build-data.mjs first.</div>}
+      {!data && !error && <div className="loading" role="status">Loading reports...</div>}
+      {data && (
+        <Landing
+          data={data} away={open}
+          onExplore={() => setSel({ ...NONE, classIdx: data.classes[0].index })}
+          onSearch={() => setSearching(true)}
+          onStat={(k) => (k === 'programs' ? changeLens('programs') : setSel({ ...NONE, classIdx: data.classes[0].index }))}
+        />
+      )}
+      {data && <SidePanel data={data} open={open} lens={lens} sel={sel} setSel={setSel} searching={searching} setSearching={setSearching} onClose={clear} />}
+    </div>
   );
 }
-
