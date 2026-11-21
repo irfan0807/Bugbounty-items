@@ -10,6 +10,18 @@
   --font: 'Recursive Variable', 'Recursive', system-ui, sans-serif;
   color-scheme: dark;
 }
+:root[data-theme='nsa'] {
+  --bg: #050c0a;
+  --raise: #0b1713;
+  --line: #18382b;
+  --ink: #d6f7df;
+  --dim: #7fa890;
+  --hot: #57f287;
+  --red: #ff5c73;
+  --signal: #55d9cf;
+  --font: 'Recursive Variable', 'Recursive', ui-monospace, 'Cascadia Code', Consolas, monospace;
+  color-scheme: dark;
+}
 :root[data-text='sm'] { font-size: 14px; }
 :root[data-text='lg'] { font-size: 19px; }
 :root[data-contrast='high'] { --dim: #c9c1aa; --line: #6b6652; }
@@ -41,6 +53,41 @@ kbd { font: inherit; }
 .mono { font-variation-settings: 'MONO' 0.5; }
 .dim { color: var(--dim); }
 .hot { color: var(--hot); }
+
+/* Subtle operations-room texture for the optional NSA Cyber palette. */
+:root[data-theme='nsa'] body {
+  background-image: radial-gradient(ellipse at 50% -20%, rgb(30 116 71 / 15%), transparent 56%);
+}
+:root[data-theme='nsa'] body::after {
+  position: fixed;
+  z-index: 1000;
+  inset: 0;
+  pointer-events: none;
+  content: '';
+  opacity: .17;
+  background: repeating-linear-gradient(to bottom, transparent 0 3px, rgb(87 242 135 / 5%) 4px);
+  mix-blend-mode: screen;
+}
+:root[data-theme='nsa'] .shell {
+  background-image: linear-gradient(rgb(85 217 207 / 2%) 1px, transparent 1px), linear-gradient(90deg, rgb(85 217 207 / 2%) 1px, transparent 1px), radial-gradient(ellipse at 50% 55%, transparent 30%, rgb(0 0 0 / 38%) 100%);
+  background-size: 48px 48px, 48px 48px, auto;
+}
+:root[data-theme='nsa'] .key,
+:root[data-theme='nsa'] .lens,
+:root[data-theme='nsa'] .set,
+:root[data-theme='nsa'] .panel,
+:root[data-theme='nsa'] .intel-detail,
+:root[data-theme='nsa'] .learn-detail-dialog {
+  box-shadow: inset 0 1px rgb(87 242 135 / 5%), 0 0 18px rgb(32 183 99 / 5%);
+}
+:root[data-theme='nsa'] .key:hover,
+:root[data-theme='nsa'] .lens button[aria-pressed='true'] {
+  box-shadow: 0 0 14px rgb(87 242 135 / 15%);
+}
+:root[data-theme='nsa'] .brand { text-shadow: 0 0 16px rgb(87 242 135 / 28%); }
+:root[data-theme='nsa'] .corner { opacity: .85; filter: drop-shadow(0 0 4px rgb(87 242 135 / 55%)); }
+:root[data-theme='nsa'] .tag,
+:root[data-theme='nsa'] .intel-source-strip small { color: var(--signal); }
 
 /* Small controls shared across screens */
 .key { background: var(--raise); border-radius: 6px; height: 30px; padding: 0 12px; font-size: 0.75rem; display: inline-flex; align-items: center; text-decoration: none; }

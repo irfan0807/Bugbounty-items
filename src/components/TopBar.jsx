@@ -19,6 +19,19 @@ function Settings({ settings, update, onClose }) {
 
   return (
     <div className="set" role="dialog" aria-label="Accessibility settings" ref={ref}>
+      <div className="set-theme" role="group" aria-label="Color theme">
+        <span className="set-theme-label">Interface theme</span>
+        <button type="button" className="set-theme-option" aria-pressed={settings.theme === 'dark'} onClick={() => update({ theme: 'dark' })}>
+          <span className="set-theme-swatch current" aria-hidden="true" />
+          <span><b>SkyNet Original</b><small>Warm dark / ember accents</small></span>
+
+        </button>
+        <button type="button" className="set-theme-option" aria-pressed={settings.theme === 'nsa'} onClick={() => update({ theme: 'nsa' })}>
+          <span className="set-theme-swatch cyber" aria-hidden="true" />
+          <span><b>NSA Cyber</b><small>Command center / phosphor green</small></span>
+
+        </button>
+      </div>
       <Row label="Motion" on={settings.motion} onClick={() => update({ motion: !settings.motion })} />
       <Row label="High contrast" on={settings.contrast} onClick={() => update({ contrast: !settings.contrast })} />
       <div className="set-row" role="group" aria-label="Text size">
